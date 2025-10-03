@@ -11,7 +11,8 @@ const SiteSettingsManager: React.FC = () => {
     site_name: '',
     site_description: '',
     currency: '',
-    currency_code: ''
+    currency_code: '',
+    delivery_fee: 0
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>('');
@@ -22,7 +23,8 @@ const SiteSettingsManager: React.FC = () => {
         site_name: siteSettings.site_name,
         site_description: siteSettings.site_description,
         currency: siteSettings.currency,
-        currency_code: siteSettings.currency_code
+        currency_code: siteSettings.currency_code,
+        delivery_fee: siteSettings.delivery_fee
       });
       setLogoPreview(siteSettings.site_logo);
     }
@@ -32,7 +34,7 @@ const SiteSettingsManager: React.FC = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: name === 'delivery_fee' ? Number(value) : value
     }));
   };
 
@@ -64,7 +66,8 @@ const SiteSettingsManager: React.FC = () => {
         site_description: formData.site_description,
         currency: formData.currency,
         currency_code: formData.currency_code,
-        site_logo: logoUrl
+        site_logo: logoUrl,
+        delivery_fee: formData.delivery_fee
       });
 
       setIsEditing(false);
@@ -80,7 +83,8 @@ const SiteSettingsManager: React.FC = () => {
         site_name: siteSettings.site_name,
         site_description: siteSettings.site_description,
         currency: siteSettings.currency,
-        currency_code: siteSettings.currency_code
+        currency_code: siteSettings.currency_code,
+        delivery_fee: siteSettings.delivery_fee
       });
       setLogoPreview(siteSettings.site_logo);
     }
@@ -249,6 +253,28 @@ const SiteSettingsManager: React.FC = () => {
               <p className="text-lg font-medium text-black">{siteSettings?.currency_code}</p>
             )}
           </div>
+        </div>
+
+        {/* Delivery Fee */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Delivery Fee ({siteSettings?.currency || '₱'})
+          </label>
+          {isEditing ? (
+            <input
+              type="number"
+              name="delivery_fee"
+              value={formData.delivery_fee}
+              onChange={handleInputChange}
+              min="0"
+              step="0.01"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              placeholder="0.00"
+            />
+          ) : (
+            <p className="text-lg font-medium text-black">{siteSettings?.currency || '₱'}{siteSettings?.delivery_fee || 0}</p>
+          )}
+          <p className="text-xs text-gray-500 mt-1">Fixed delivery fee for all delivery orders</p>
         </div>
       </div>
     </div>

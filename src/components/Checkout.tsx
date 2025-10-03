@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Clock } from 'lucide-react';
 import { CartItem, PaymentMethod, ServiceType } from '../types';
 import { usePaymentMethods } from '../hooks/usePaymentMethods';
+import { useSiteSettings } from '../hooks/useSiteSettings';
 
 interface CheckoutProps {
   cartItems: CartItem[];
@@ -11,6 +12,7 @@ interface CheckoutProps {
 
 const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack }) => {
   const { paymentMethods } = usePaymentMethods();
+  const { siteSettings } = useSiteSettings();
   const [step, setStep] = useState<'details' | 'payment'>('details');
   const [customerName, setCustomerName] = useState('');
   const [contactNumber, setContactNumber] = useState('');
@@ -19,11 +21,8 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack }) =>
   const [landmark, setLandmark] = useState('');
   const [pickupTime, setPickupTime] = useState('5-10');
   const [customTime, setCustomTime] = useState('');
-  // Dine-in specific state
-  const [partySize, setPartySize] = useState(1);
-  const [dineInTime, setDineInTime] = useState('');
+  // Dine-in specific state (removed party size and time selection)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('gcash');
-  const [referenceNumber, setReferenceNumber] = useState('');
   const [notes, setNotes] = useState('');
 
   React.useEffect(() => {
@@ -38,6 +37,10 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack }) =>
   }, [paymentMethods, paymentMethod]);
 
   const selectedPaymentMethod = paymentMethods.find(method => method.id === paymentMethod);
+  
+  // Calculate delivery fee and total
+  const deliveryFee = serviceType === 'delivery' ? (siteSettings?.delivery_fee || 0) : 0;
+  const finalTotal = totalPrice + deliveryFee;
 
   const handleProceedToPayment = () => {
     setStep('payment');
@@ -48,16 +51,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack }) =>
       ? (pickupTime === 'custom' ? customTime : `${pickupTime} minutes`)
       : '';
     
-    const dineInInfo = serviceType === 'dine-in' 
-      ? `👥 Party Size: ${partySize} person${partySize !== 1 ? 's' : ''}\n🕐 Preferred Time: ${new Date(dineInTime).toLocaleString('en-US', { 
-          weekday: 'long', 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric', 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        })}`
-      : '';
+    const dineInInfo = '';
     
     const orderDetails = `
 🛒 Spud Station  ORDER
@@ -87,8 +81,9 @@ ${cartItems.map(item => {
   return itemDetails;
 }).join('\n')}
 
-💰 TOTAL: ₱${totalPrice}
-${serviceType === 'delivery' ? `🛵 DELIVERY FEE:` : ''}
+💰 SUBTOTAL: ₱${totalPrice}
+${serviceType === 'delivery' ? `🛵 DELIVERY FEE: ₱${deliveryFee}` : ''}
+💰 TOTAL: ₱${finalTotal}
 
 💳 Payment: ${selectedPaymentMethod?.name || paymentMethod}
 📸 Payment Screenshot: Please attach your payment receipt screenshot
@@ -107,8 +102,7 @@ Please confirm this order to proceed. Thank you for choosing Spud Station ! 🥟
 
   const isDetailsValid = customerName && contactNumber && 
     (serviceType !== 'delivery' || address) && 
-    (serviceType !== 'pickup' || (pickupTime !== 'custom' || customTime)) &&
-    (serviceType !== 'dine-in' || (partySize > 0 && dineInTime));
+    (serviceType !== 'pickup' || (pickupTime !== 'custom' || customTime));
 
   if (step === 'details') {
     return (
@@ -149,10 +143,20 @@ Please confirm this order to proceed. Thank you for choosing Spud Station ! 🥟
               ))}
             </div>
             
-            <div className="border-t border-red-200 pt-4">
-              <div className="flex items-center justify-between text-2xl font-noto font-semibold text-black">
-                <span>Total:</span>
+            <div className="border-t border-red-200 pt-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span>Subtotal:</span>
                 <span>₱{totalPrice}</span>
+              </div>
+              {serviceType === 'delivery' && (
+                <div className="flex items-center justify-between">
+                  <span>Delivery Fee:</span>
+                  <span>₱{deliveryFee}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between text-2xl font-noto font-semibold text-black border-t border-red-200 pt-2">
+                <span>Total:</span>
+                <span>₱{finalTotal}</span>
               </div>
             </div>
           </div>
@@ -213,44 +217,7 @@ Please confirm this order to proceed. Thank you for choosing Spud Station ! 🥟
                 </div>
               </div>
 
-              {/* Dine-in Details */}
-              {serviceType === 'dine-in' && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-black mb-2">Party Size *</label>
-                    <div className="flex items-center space-x-4">
-                      <button
-                        type="button"
-                        onClick={() => setPartySize(Math.max(1, partySize - 1))}
-                        className="w-10 h-10 rounded-lg border-2 border-red-300 flex items-center justify-center text-red-600 hover:border-red-400 hover:bg-red-50 transition-all duration-200"
-                      >
-                        -
-                      </button>
-                      <span className="text-2xl font-semibold text-black min-w-[3rem] text-center">{partySize}</span>
-                      <button
-                        type="button"
-                        onClick={() => setPartySize(Math.min(20, partySize + 1))}
-                        className="w-10 h-10 rounded-lg border-2 border-red-300 flex items-center justify-center text-red-600 hover:border-red-400 hover:bg-red-50 transition-all duration-200"
-                      >
-                        +
-                      </button>
-                      <span className="text-sm text-gray-600 ml-2">person{partySize !== 1 ? 's' : ''}</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-black mb-2">Preferred Time *</label>
-                    <input
-                      type="datetime-local"
-                      value={dineInTime}
-                      onChange={(e) => setDineInTime(e.target.value)}
-                      className="w-full px-4 py-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
-                      required
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Please select your preferred dining time</p>
-                  </div>
-                </>
-              )}
+              {/* Dine-in Details - Removed party size and time selection */}
 
               {/* Pickup Time Selection */}
               {serviceType === 'pickup' && (
@@ -398,7 +365,7 @@ Please confirm this order to proceed. Thank you for choosing Spud Station ! 🥟
                   <p className="text-sm text-gray-600 mb-1">{selectedPaymentMethod.name}</p>
                   <p className="font-mono text-black font-medium">{selectedPaymentMethod.account_number}</p>
                   <p className="text-sm text-gray-600 mb-3">Account Name: {selectedPaymentMethod.account_name}</p>
-                  <p className="text-xl font-semibold text-black">Amount: ₱{totalPrice}</p>
+                  <p className="text-xl font-semibold text-black">Amount: ₱{finalTotal}</p>
                 </div>
                 <div className="flex-shrink-0">
                   <img 
@@ -446,21 +413,7 @@ Please confirm this order to proceed. Thank you for choosing Spud Station ! 🥟
                 </p>
               )}
               {serviceType === 'dine-in' && (
-                <>
-                  <p className="text-sm text-gray-600">
-                    Party Size: {partySize} person{partySize !== 1 ? 's' : ''}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Preferred Time: {dineInTime ? new Date(dineInTime).toLocaleString('en-US', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric', 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    }) : 'Not selected'}
-                  </p>
-                </>
+                <p className="text-sm text-gray-600">Service: Dine-in</p>
               )}
             </div>
 
@@ -487,10 +440,20 @@ Please confirm this order to proceed. Thank you for choosing Spud Station ! 🥟
             ))}
           </div>
           
-          <div className="border-t border-red-200 pt-4 mb-6">
-            <div className="flex items-center justify-between text-2xl font-noto font-semibold text-black">
-              <span>Total:</span>
+          <div className="border-t border-red-200 pt-4 mb-6 space-y-2">
+            <div className="flex items-center justify-between">
+              <span>Subtotal:</span>
               <span>₱{totalPrice}</span>
+            </div>
+            {serviceType === 'delivery' && (
+              <div className="flex items-center justify-between">
+                <span>Delivery Fee:</span>
+                <span>₱{deliveryFee}</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between text-2xl font-noto font-semibold text-black border-t border-red-200 pt-2">
+              <span>Total:</span>
+              <span>₱{finalTotal}</span>
             </div>
           </div>
 
