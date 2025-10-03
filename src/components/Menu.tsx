@@ -2,6 +2,8 @@ import React from 'react';
 import { MenuItem, CartItem } from '../types';
 import { useCategories } from '../hooks/useCategories';
 import MenuItemCard from './MenuItemCard';
+import MenuItemList from './MenuItemList';
+import ViewToggle from './ViewToggle';
 import MobileNav from './MobileNav';
 
 // Preload images for better performance
@@ -24,6 +26,21 @@ interface MenuProps {
 const Menu: React.FC<MenuProps> = ({ menuItems, addToCart, cartItems, updateQuantity }) => {
   const { categories } = useCategories();
   const [activeCategory, setActiveCategory] = React.useState('hot-coffee');
+  const [view, setView] = React.useState<'grid' | 'list'>('grid');
+
+  // Check if device is mobile and set default view
+  React.useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768; // md breakpoint
+      if (mobile && view === 'grid') {
+        setView('list');
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, [view]);
 
   // Preload images when menu items change
   React.useEffect(() => {
@@ -93,11 +110,17 @@ const Menu: React.FC<MenuProps> = ({ menuItems, addToCart, cartItems, updateQuan
       />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="text-center mb-12">
-        <h2 className="text-4xl font-noto font-semibold text-black mb-4">Our Menu</h2>
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          Discover our selection of authentic dim sum, flavorful noodles, and traditional Asian dishes, 
-          all prepared with fresh ingredients and authentic techniques.
+        <h2 className="text-4xl font-pretendard font-bold text-spud-brown mb-4">Our Menu</h2>
+        <div className="w-24 h-1 bg-spud-orange mx-auto mb-6 rounded-full"></div>
+        <p className="text-spud-dark max-w-2xl mx-auto text-lg leading-relaxed">
+          Discover our selection of loaded baked potatoes and crispy flavored fries, 
+          all prepared with premium ingredients and authentic flavors.
         </p>
+        
+        {/* View Toggle */}
+        <div className="flex justify-center mt-6">
+          <ViewToggle view={view} onViewChange={setView} />
+        </div>
       </div>
 
       {categories.map((category) => {
@@ -107,25 +130,47 @@ const Menu: React.FC<MenuProps> = ({ menuItems, addToCart, cartItems, updateQuan
         
         return (
           <section key={category.id} id={category.id} className="mb-16">
-            <div className="flex items-center mb-8">
-              <span className="text-3xl mr-3">{category.icon}</span>
-              <h3 className="text-3xl font-noto font-medium text-black">{category.name}</h3>
+            <div className="flex items-center justify-center mb-8">
+              <div className="bg-spud-orange rounded-2xl p-4 shadow-lg">
+                <span className="text-4xl">{category.icon}</span>
+              </div>
+              <div className="ml-6">
+                <h3 className="text-4xl font-pretendard font-bold text-spud-brown uppercase tracking-wide">{category.name}</h3>
+                <div className="w-16 h-1 bg-spud-orange mt-2 rounded-full"></div>
+              </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {categoryItems.map((item) => {
-                const cartItem = cartItems.find(cartItem => cartItem.id === item.id);
-                return (
-                  <MenuItemCard
-                    key={item.id}
-                    item={item}
-                    onAddToCart={addToCart}
-                    quantity={cartItem?.quantity || 0}
-                    onUpdateQuantity={updateQuantity}
-                  />
-                );
-              })}
-            </div>
+            {view === 'grid' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {categoryItems.map((item) => {
+                  const cartItem = cartItems.find(cartItem => cartItem.id === item.id);
+                  return (
+                    <MenuItemCard
+                      key={item.id}
+                      item={item}
+                      onAddToCart={addToCart}
+                      quantity={cartItem?.quantity || 0}
+                      onUpdateQuantity={updateQuantity}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {categoryItems.map((item) => {
+                  const cartItem = cartItems.find(cartItem => cartItem.id === item.id);
+                  return (
+                    <MenuItemList
+                      key={item.id}
+                      item={item}
+                      onAddToCart={addToCart}
+                      quantity={cartItem?.quantity || 0}
+                      onUpdateQuantity={updateQuantity}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </section>
         );
       })}

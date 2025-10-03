@@ -4,6 +4,18 @@ export default {
   theme: {
     extend: {
       colors: {
+        spud: {
+          // Primary brand colors from Spud Station design
+          cream: '#F8F5ED',        // Main background - soft creamy beige
+          brown: '#5C3A21',        // Primary text and headings - rich dark brown
+          orange: '#C77D3F',       // Accent color - warm earthy orange-brown
+          white: '#FFFFFF',        // Pure white for logo text
+          dark: '#2D1B0F',         // Darker brown for contrast
+          light: '#FDFCF9',        // Lighter cream for cards
+          border: '#E5D5C8',       // Subtle border color
+          hover: '#A05A2C'         // Darker orange for hover states
+        },
+        // Keep original ramen colors for backward compatibility
         ramen: {
           red: '#D7263D',
           dark: '#0B0A0A',
@@ -19,6 +31,14 @@ export default {
       fontFamily: {
         'pretendard': ['Pretendard', 'system-ui', 'sans-serif'],
         'noto-kr': ['Noto Serif KR', 'serif']
+      },
+      backgroundImage: {
+        'checkerboard': 'repeating-conic-gradient(#5C3A21 0% 25%, #C77D3F 0% 50%)',
+        'checkerboard-small': 'repeating-conic-gradient(#5C3A21 0% 12.5%, #C77D3F 0% 25%)',
+      },
+      backgroundSize: {
+        'checkerboard': '20px 20px',
+        'checkerboard-small': '10px 10px',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

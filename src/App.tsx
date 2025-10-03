@@ -30,7 +30,7 @@ function MainApp() {
     : menuItems.filter(item => item.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-cream-50 font-inter">
+    <div className="min-h-screen bg-spud-cream font-pretendard">
       <Header 
         cartItemsCount={cart.getTotalItems()}
         onCartClick={() => handleViewChange('cart')}
@@ -73,6 +73,9 @@ function MainApp() {
           onCartClick={() => handleViewChange('cart')}
         />
       )}
+      
+      {/* Checkerboard bottom border */}
+      <div className="h-2 bg-checkerboard bg-checkerboard-small"></div>
     </div>
   );
 }
