@@ -88,10 +88,10 @@ const MenuItemList: React.FC<MenuItemListProps> = ({
 
   return (
     <>
-      <div className={`bg-spud-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-spud-border hover:border-spud-orange p-4 ${!item.available ? 'opacity-60' : ''}`}>
-        <div className="flex items-center space-x-4">
+      <div className={`bg-spud-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-spud-border hover:border-spud-orange p-3 sm:p-4 ${!item.available ? 'opacity-60' : ''}`}>
+        <div className="flex items-start space-x-3 sm:space-x-4 flex-wrap sm:flex-nowrap">
           {/* Image */}
-          <div className="relative w-20 h-20 bg-gradient-to-br from-spud-cream to-spud-light rounded-lg flex-shrink-0">
+          <div className="relative w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-spud-cream to-spud-light rounded-lg flex-shrink-0">
             {item.image ? (
               <img
                 src={item.image}
@@ -125,24 +125,24 @@ const MenuItemList: React.FC<MenuItemListProps> = ({
           </div>
 
           {/* Content */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex-1">
-                <h4 className="text-lg font-bold text-spud-brown leading-tight">{item.name}</h4>
-                <p className={`text-sm leading-relaxed mt-1 ${!item.available ? 'text-spud-border' : 'text-spud-dark'}`}>
+          <div className="flex-1 min-w-0 flex flex-col w-full sm:w-auto">
+            <div className="flex items-start justify-between mb-2 w-full">
+              <div className="flex-1 min-w-0 pr-2">
+                <h4 className="text-base sm:text-lg font-bold text-spud-brown leading-tight break-words">{item.name}</h4>
+                <p className={`text-xs sm:text-sm leading-relaxed mt-1 break-words ${!item.available ? 'text-spud-border' : 'text-spud-dark'}`}>
                   {!item.available ? 'Currently Unavailable' : item.description}
                 </p>
               </div>
               
               {/* Price */}
-              <div className="text-right ml-4">
+              <div className="text-right flex-shrink-0 ml-2">
                 {item.isOnDiscount && item.discountPrice ? (
                   <div className="space-y-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xl font-bold text-spud-orange">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2">
+                      <span className="text-lg sm:text-xl font-bold text-spud-orange">
                         ₱{item.discountPrice.toFixed(2)}
                       </span>
-                      <span className="text-sm text-spud-border line-through">
+                      <span className="text-xs sm:text-sm text-spud-border line-through">
                         ₱{item.basePrice.toFixed(2)}
                       </span>
                     </div>
@@ -151,7 +151,7 @@ const MenuItemList: React.FC<MenuItemListProps> = ({
                     </div>
                   </div>
                 ) : (
-                  <div className="text-xl font-bold text-spud-brown">
+                  <div className="text-lg sm:text-xl font-bold text-spud-brown">
                     ₱{item.basePrice.toFixed(2)}
                   </div>
                 )}
@@ -160,7 +160,7 @@ const MenuItemList: React.FC<MenuItemListProps> = ({
 
             {/* Add-ons indicator */}
             {item.addOns && item.addOns.length > 0 && (
-              <div className="flex items-center space-x-1 text-xs text-spud-orange bg-spud-cream px-2 py-1 rounded-lg border border-spud-orange font-semibold w-fit">
+              <div className="flex items-center space-x-1 text-xs text-spud-orange bg-spud-cream px-2 py-1 rounded-lg border border-spud-orange font-semibold w-fit mt-2">
                 <span>+</span>
                 <span>{item.addOns.length} add-on{item.addOns.length > 1 ? 's' : ''} available</span>
               </div>
@@ -168,35 +168,35 @@ const MenuItemList: React.FC<MenuItemListProps> = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 mt-2 sm:mt-0 w-full sm:w-auto flex justify-end sm:justify-start">
             {!item.available ? (
               <button
                 disabled
-                className="bg-spud-border text-spud-border px-4 py-2 rounded-xl cursor-not-allowed font-medium text-sm border border-spud-border"
+                className="bg-spud-border text-spud-border px-3 sm:px-4 py-2 rounded-xl cursor-not-allowed font-medium text-xs sm:text-sm border border-spud-border"
               >
                 Unavailable
               </button>
             ) : quantity === 0 ? (
               <button
                 onClick={handleAddToCart}
-                className="bg-gradient-to-r from-spud-orange to-spud-hover text-spud-white px-6 py-2 rounded-xl hover:from-spud-hover hover:to-spud-orange transition-all duration-200 transform hover:scale-105 font-bold text-sm shadow-lg hover:shadow-xl border border-spud-brown"
+                className="bg-gradient-to-r from-spud-orange to-spud-hover text-spud-white px-4 sm:px-6 py-2 rounded-xl hover:from-spud-hover hover:to-spud-orange transition-all duration-200 transform hover:scale-105 font-bold text-xs sm:text-sm shadow-lg hover:shadow-xl border border-spud-brown"
               >
-                {item.variations?.length || item.addOns?.length ? 'Customize' : 'Add to Cart'}
+                {item.variations?.length || item.addOns?.length ? 'Customize' : 'Add'}
               </button>
             ) : (
-              <div className="flex items-center space-x-2 bg-gradient-to-r from-spud-cream to-spud-light rounded-xl p-1 border-2 border-spud-orange">
+              <div className="flex items-center space-x-1 sm:space-x-2 bg-gradient-to-r from-spud-cream to-spud-light rounded-xl p-1 border-2 border-spud-orange">
                 <button
                   onClick={handleDecrement}
-                  className="p-2 hover:bg-spud-orange hover:text-spud-white rounded-lg transition-all duration-200 hover:scale-110"
+                  className="p-1.5 sm:p-2 hover:bg-spud-orange hover:text-spud-white rounded-lg transition-all duration-200 hover:scale-110"
                 >
-                  <Minus className="h-4 w-4 text-spud-brown" />
+                  <Minus className="h-3 w-3 sm:h-4 sm:w-4 text-spud-brown" />
                 </button>
-                <span className="font-bold text-spud-brown min-w-[28px] text-center text-sm">{quantity}</span>
+                <span className="font-bold text-spud-brown min-w-[20px] sm:min-w-[28px] text-center text-xs sm:text-sm">{quantity}</span>
                 <button
                   onClick={handleIncrement}
-                  className="p-2 hover:bg-spud-orange hover:text-spud-white rounded-lg transition-all duration-200 hover:scale-110"
+                  className="p-1.5 sm:p-2 hover:bg-spud-orange hover:text-spud-white rounded-lg transition-all duration-200 hover:scale-110"
                 >
-                  <Plus className="h-4 w-4 text-spud-brown" />
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4 text-spud-brown" />
                 </button>
               </div>
             )}
